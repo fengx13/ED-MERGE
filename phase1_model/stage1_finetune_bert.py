@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Phase 1, Stage 1: lightly fine-tune BioClinicalBERT on the new event-stream
+Phase 1, Stage 1: lightly fine-tune BioClinicalBERT on the event-stream
 data before freezing it for embedding precomputation (Stage 2).
 
 Architecture: BERT + attention-pooling text encoder, tabular MLP, fusion
-classifier, focal loss, differential learning rates. The training snapshot
-comes from: instead of loading a pre-built fixed-window
-train.pkl, each training example is assembled on the fly from the Phase 0
-event-stream tables at a RANDOMLY SAMPLED landmark time (resampled every
-epoch). This means even this intermediate stage is already training on
-varied landmarks rather than one fixed window, even though it is not yet
-the sequence model (that's Stage 2 + the sequence model itself).
+classifier, focal loss, differential learning rates. Each training example
+is assembled on the fly from the Phase 0 event-stream tables at a randomly
+sampled landmark time (resampled every epoch), so this stage also trains on
+varied landmarks.
 
 Only the fine-tuned BERT encoder is consumed downstream (by
 precompute_note_embeddings.py) -- the attention-pool/tabular/fusion modules
@@ -302,11 +299,9 @@ def main():
         doc_stride=args.doc_stride, max_windows_per_sample=args.max_windows_per_sample,
     )
     # drop_last=True: BatchNorm1d in the tabular encoder (see Stage1Model)
-    # requires batch_size > 1 in train mode -- without this, whenever
-    # len(train_ds) % batch_size == 1, the final batch of every epoch has
-    # exactly 1 sample and crashes several hours into training. Only the
-    # train loader needs this; eval uses running statistics (model.eval()),
-    # so val_loader is unaffected regardless of its last batch size.
+    # requires batch_size > 1 in train mode; a final batch of 1 sample would
+    # fail. Only the train loader needs this; eval uses running statistics
+    # (model.eval()), so val_loader is unaffected.
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, collate_fn=collate, num_workers=args.num_workers, pin_memory=True, drop_last=True)
     val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, collate_fn=collate, num_workers=args.num_workers, pin_memory=True)
 
@@ -358,9 +353,8 @@ def main():
             encoder_dir = os.path.join(args.output_dir, "bert_encoder")
             os.makedirs(encoder_dir, exist_ok=True)
             # safe_serialization=False: the attention-pooling wrapper around
-            # this encoder can leave some weight tensors non-contiguous
-            # (observed in smoke testing), which safetensors refuses to
-            # save. The legacy torch.save-based format has no such
+            # this encoder can leave some weight tensors non-contiguous,
+            # which safetensors refuses to save. The legacy torch.save-based format has no such
             # restriction and transformers' from_pretrained loads it
             # transparently either way.
             model.text_encoder.encoder.save_pretrained(encoder_dir, safe_serialization=False)

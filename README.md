@@ -69,7 +69,7 @@ python external_validation/evaluate_external.py --event_dir MIMIC_EVENTS \
 
 ## Results
 
-**Internal temporal test** (245,247 encounters, new patients 2023–2025): macro AUROC 0.874 at arrival → 0.957 at 6 h.
+**Internal test** (245,247 encounters, new patients first seen 2023–2025): macro AUROC 0.874 at arrival → 0.957 at 6 h.
 
 ![Internal performance](figures/fig2_internal_performance.png)
 

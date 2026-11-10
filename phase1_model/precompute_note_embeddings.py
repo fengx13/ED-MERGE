@@ -23,9 +23,7 @@ Output per split under --output_dir:
   {split}_note_embeddings.npy         float32 array, shape (N_notes, hidden_size)
   {split}_note_embeddings_index.parquet   stay_id, t_minutes, row_idx (join key into the .npy),
                                            plus tos/role AUDIT columns when present in the source
-                                           notes_events.parquet (never used by the model -- lets a
-                                           note-type/role sensitivity analysis filter
-                                           these SAME cached embeddings post-hoc without retraining)
+                                           notes_events.parquet (never used by the model)
 """
 
 import os

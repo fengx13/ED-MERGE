@@ -2,8 +2,7 @@
 Sentence-level cleaning of MIMIC-IV-Note discharge-summary HPI, for ED-MERGE's
 external validation cohort.
 
-Adapted from a sibling project's chest-pain-only HPI cleaner (ED-Agent/data_processing/
-hpi_clean.py). The discharge summary is written after the whole stay (ED + any
+The discharge summary is written after the whole stay (ED + any
 inpatient course), so its HPI mixes what the patient reported on arrival with
 the ED work-up, outside-hospital findings and the hospital course -- using the
 raw HPI as "notes available during the ED stay" would leak the outcome. Each
@@ -16,24 +15,14 @@ HPI sentence is labelled by an LLM:
 Only K sentences are kept, verbatim. The cleaned text therefore contains no
 model-written words.
 
-Structural regexes (HPI header, section end, sentence splitting, and the
-generic encounter/finding/negation/past-episode cues in rule_veto) are
-unchanged from the source project -- verified against 500 real MIMIC-IV-Note
-discharge.csv rows: 97.8% HPI-header match rate, 0 fallbacks to
-the 4000-char cap, median HPI length 1292 chars. The two content tables below
-(_STUDY_DX, _TEST_RESULT) and the new _ICU_DEATH block ARE changed -- the
-source project only covers the chest-pain differential (ACS/PE/AHF/pneumonia/
-COPD/aortic dissection/pneumothorax/pericarditis); ED-MERGE's external
-validation covers its own 13 diagnosis outcomes (same ICD-9/10 lists as the
-outcome labels) plus the "Critical" outcome (ICU admission or death), which
-has no diagnosis name at all and needed a dedicated keyword block.
-
-One fix made here but not present upstream: _NEGATED only caught negation
-stated BEFORE a test/ICU-death match ("no troponin elevation"); added
-_NEGATED_AFTER for negation stated in the same clause AFTER the match ("CT
-head showed no acute hemorrhage"), which the source project's sentence set
-apparently never exercised (caught by an 11-case smoke test, 10/11 before
-the fix).
+The rule layer (rule_veto) re-checks K sentences with structural regexes (HPI
+header, section end, sentence splitting, encounter/finding/negation/past-episode
+cues) and three content tables: _STUDY_DX and _TEST_RESULT cover the 13
+diagnosis outcomes (clinical synonyms of the outcome ICD-9/10 lists), and
+_ICU_DEATH covers the "Critical" outcome (ICU admission or death), which has
+no diagnosis name. Negation is caught both before (_NEGATED, "no troponin
+elevation") and after (_NEGATED_AFTER, "CT head showed no acute hemorrhage")
+the match, within the same clause.
 
 Known gap: ED-MERGE's "Bacterial pneumonia" and "Viral pneumonia" outcomes
 share one combined all-cause-pneumonia code list (MIMIC codes have no

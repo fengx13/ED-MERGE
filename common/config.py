@@ -40,8 +40,7 @@ MASTER_ADMITTIME_COL = "admittime"    # hospital admission time (complementary c
 
 # ESI triage acuity -- carried through to {split}_static.parquet as an
 # AUDIT/METADATA column only (not added to static_raw_cols, not scaled, not
-# fed to the model). Used downstream for confound-stratified analysis (sicker
-# patients get more/faster documentation).
+# fed to the model).
 MASTER_TRIAGE_ACUITY_COL = "triage_acuity"
 
 NOTES_STAY_COL_DEFAULT = "SERVICE_ID"
@@ -49,12 +48,8 @@ NOTES_TIME_COL_DEFAULT = "FILING_DATE"
 NOTES_TEXT_COL_DEFAULT = "NOTE_TEXT"
 # TOS (note type, e.g. "9.k.1. Progress Note") and ROLE (author's clinical
 # role, e.g. "11. Physician") -- carried through notes_events.parquet and the
-# note-embedding index as AUDIT metadata only, never fed to the model. This
-# keeps the production model blind to note type/role so a sensitivity
-# analysis (excluding diagnostic-note types, comparing physician-authored vs.
-# nursing-authored performance) can filter the SAME cached embeddings
-# post-hoc without retraining. Missing from the source -> warning, not
-# fatal, same pattern as triage_acuity.
+# note-embedding index as AUDIT metadata only, never fed to the model.
+# Missing from the source -> warning, not fatal, same pattern as triage_acuity.
 NOTES_TOS_COL_DEFAULT = "TOS"
 NOTES_ROLE_COL_DEFAULT = "ROLE"
 

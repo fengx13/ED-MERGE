@@ -16,7 +16,7 @@ import torch.nn as nn
 from common import config as cfg
 
 MODALITY_PAD = 0
-MODALITY_VITAL = 1  # "vital" event slot now covers the full vitals+labs structured state vector
+MODALITY_VITAL = 1  # structured event: the full vitals+labs state vector
 MODALITY_NOTE = 2
 NUM_VITAL_CHANNELS = len(cfg.STRUCTURED_CHANNELS)  # 6 vitals + 16 labs, see config.py STRUCTURED_CHANNELS
 

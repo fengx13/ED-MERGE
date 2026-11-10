@@ -17,9 +17,7 @@ Design:
   3. Notes are stored as a chronological event stream (raw text; embedding
      happens in Phase 1), not aggregated into an order-agnostic list. TOS
      (note type) and ROLE (author role) are carried through as AUDIT
-     metadata only -- never fed to the model -- for a
-     note-type/role sensitivity analysis that can filter the cached
-     embeddings post-hoc without retraining.
+     metadata only -- never fed to the model.
   4. Subject-level exclusivity is enforced GLOBALLY (a subject's encounters
      never span train/val and test), while preserving the forward-in-time
      framing: patients first seen in or after --test_year_ge form the test
@@ -83,8 +81,7 @@ def clean_id_series_dropna_then_str(s: pd.Series) -> pd.Series:
 
 
 def load_dx_time_from_tables(dx_tables_dir: str) -> pd.DataFrame:
-    """The 2026-10 master export dropped the combined dx_time column --
-    dx_time now lives in separate per-outcome tables under dx_tables_dir
+    """dx_time lives in separate per-outcome tables under dx_tables_dir
     (e.g. 09_out_dx_acs_mi.parquet: subject_id, stay_id, dx_time,
     outcome_<name>). Collects dx_time across ALL of them and, per stay_id,
     keeps the EARLIEST one -- the most conservative boundary, since
@@ -189,7 +186,7 @@ def load_vitals_wide(vitals_parquet_path: str) -> pd.DataFrame:
 
 
 def build_vitals_wide(vitals_raw: pd.DataFrame) -> pd.DataFrame:
-    """Renames the new wide vitals source to internal channel names and
+    """Renames the wide vitals source to internal channel names and
     standardizes temperature units. Returns stay_id, event_time, VITAL_CHANNELS.
     """
     v = vitals_raw.copy()
@@ -569,22 +566,20 @@ def main():
     master["admittime_boundary_minutes"] = _boundary_minutes_relative_to_origin(master[args.admittime_col])
 
     # Disposition boundary: prefer edouttime (true ED-departure) when present;
-    # fall back to admittime (covers the 99% of hospitalized encounters where
-    # edouttime is never logged). Coalesce, not min-of-both: edouttime is
-    # LATER than admittime 55.26% of the time when both exist (real ED
-    # boarding -- patient administratively admitted while still physically in
-    # the ED awaiting a bed), and boarding-era documentation is still
-    # legitimately ED-phase data.
+    # fall back to admittime (covers hospitalized encounters where edouttime
+    # is not logged). Coalesce, not min-of-both: edouttime can be LATER than
+    # admittime (ED boarding -- patient administratively admitted while still
+    # physically in the ED awaiting a bed), and boarding-era documentation is
+    # still legitimately ED-phase data.
     master["disposition_boundary_minutes"] = master["edouttime_boundary_minutes"].where(
         master["edouttime_boundary_minutes"].notna(), master["admittime_boundary_minutes"]
     )
 
     # data_boundary_minutes = min(dx_boundary, disposition_boundary), NaN-safe.
     # This -- not dx_boundary_minutes alone -- is what actually truncates the
-    # vitals/notes event streams below. dx_time alone leaves 87.4% of
-    # encounters with zero protection (it's null for essentially all
-    # operational-outcome-only encounters); the combined boundary above
-    # covers 98.6% overall and 100% of hospitalized encounters specifically.
+    # vitals/notes event streams below. dx_time alone is null for encounters
+    # without a diagnosis-based outcome, so it would leave most encounters
+    # without a boundary; the disposition boundary covers them.
     master["data_boundary_minutes"] = master[["dx_boundary_minutes", "disposition_boundary_minutes"]].min(axis=1, skipna=True)
 
     all_cols = master.columns.tolist()

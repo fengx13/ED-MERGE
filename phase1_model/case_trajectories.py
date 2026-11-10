@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Case-level risk trajectories for single test-set encounters (Results case figure).
+Case-level risk trajectories for single test-set encounters.
 
 Two modes:
   --mode candidates   rank true-positive encounters of --outcome that start

@@ -1,9 +1,8 @@
 """
 Label HPI sentences (K / P / D) with a local open-weight model; see hpi_clean.py.
 
-Model: Qwen2.5-7B-Instruct (the model used for the reported external
-validation). --model takes the local model directory; any chat model that
-supports tokenizer.apply_chat_template works.
+Default model: Qwen2.5-7B-Instruct. --model takes the local model directory;
+any chat model that supports tokenizer.apply_chat_template works.
 
 Greedy decoding, so a rerun with the same model reproduces the labels.
 

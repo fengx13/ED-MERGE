@@ -162,10 +162,9 @@ def main():
         args.max_landmark_minutes, seed=args.seed + 1, resample_each_epoch=False,
     )
 
-    # drop_last=True: same BatchNorm1d-needs-batch_size>1-in-train-mode issue
-    # as stage1_finetune_bert.py -- crashed there several hours in when
-    # len(train) % batch_size == 1. Only the train loader needs this (eval
-    # uses running stats).
+    # drop_last=True: BatchNorm1d requires batch_size > 1 in train mode (see
+    # stage1_finetune_bert.py). Only the train loader needs this (eval uses
+    # running stats).
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True,
                                collate_fn=collate_sequence_batch, num_workers=args.num_workers, pin_memory=True,
                                drop_last=True)

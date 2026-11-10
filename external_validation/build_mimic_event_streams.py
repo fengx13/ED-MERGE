@@ -182,9 +182,7 @@ def resolve_lab_itemids(d_labitems_path, override_path):
 
 
 # Censored results ("<0.01", "LESS THAN 0.01", ">21600*") have an empty valuenum
-# in MIMIC-IV, with the text in `comments`. Dropping them discards most negative
-# troponins (58% of itemid 51003), leaving mainly elevated values -- so they are
-# kept at the detection limit instead.
+# in MIMIC-IV, with the text in `comments`; _CENSORED parses the detection limit.
 _CENSORED = re.compile(r"^\s*(?:<|>|less than|greater than)\s*(\d*\.?\d+)", re.I)
 
 

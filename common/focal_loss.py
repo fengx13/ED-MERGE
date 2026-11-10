@@ -3,7 +3,6 @@
 Multi-label focal loss. With `reduction="mean"` it is an unweighted mean
 over all tasks and samples: it averages over every element of the (batch, num_labels) logits/targets
 tensor, i.e. every task and every sample in the batch contribute equally.
-Document this explicitly in the manuscript's Methods section this time.
 """
 
 import torch

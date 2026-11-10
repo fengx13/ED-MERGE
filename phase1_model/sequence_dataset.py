@@ -5,9 +5,10 @@ chronological event sequence (vitals state updates + cached note embeddings,
 merged and sorted by time) truncated at a landmark time T.
 
 Content width is unified at 768 (the BERT hidden size) so both modalities can
-share one padded batch tensor: a vital event's 6-d state vector occupies the
-first 6 slots and the rest are zero; a note event's cached 768-d embedding
-fills the whole slot. The model (sequence_model.py) applies separate
+share one padded batch tensor: a structured event's state vector
+(len(cfg.STRUCTURED_CHANNELS) channels: vitals + labs) occupies the first
+slots and the rest are zero; a note event's cached 768-d embedding fills the
+whole slot. The model (sequence_model.py) applies separate
 modality-specific projections and selects per-event by modality tag. This dataset does NOT run BERT; it only reads
 already-cached embeddings from precompute_note_embeddings.py.
 

@@ -86,9 +86,7 @@ def main():
         print(f"[T={T} min] macro AUROC={metrics['macro']['AUROC']:.4f} AUPRC={metrics['macro']['AUPRC']:.4f}")
 
         # ---- per-encounter detail: stay_id, per-outcome prob/label, n_notes/
-        # n_vitals seen so far, ESI -- the raw material for the information-
-        # content-axis analysis (reindexing by info count instead of clock
-        # time).
+        # n_vitals seen so far, ESI.
         probs = 1 / (1 + np.exp(-logits))
         n_rows = len(meta["stay_ids"])
         for i in range(n_rows):
